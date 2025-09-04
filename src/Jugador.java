@@ -3,21 +3,6 @@ import javax.swing.JPanel;
 
 public class Jugador {
 
-    private static final int[] PUNTOS_POR_CARTA = {
-        1,  //AS
-        2,  //DOS
-        3,  //TRES
-        4,  //CUATRO
-        5,  //CINCO
-        6,  //SEIS
-        7,  //SIETE
-        8,  //OCHO
-        9,  //NUEVE
-        10, //JACK
-        10, //QUEEN
-        10, //KING
-    };
-
     private final int TOTAL_CARTAS = 10;
     private final int MARGEN = 10;
     private final int SEPARACION = 40;
@@ -32,6 +17,12 @@ public class Jugador {
 
     public void mostrar(JPanel pnl) {
         pnl.removeAll();
+        /*
+         * for (int i = 0; i < TOTAL_CARTAS; i++) {
+         * Carta carta=cartas[i];
+         * carta.mostrar(pnl, , );
+         * }
+         */
         int posicion = MARGEN + TOTAL_CARTAS * SEPARACION;
         for (Carta carta : cartas) {
             carta.mostrar(pnl, posicion, MARGEN);
@@ -42,45 +33,33 @@ public class Jugador {
 
     public String getGrupos() {
         String resultado = "No se encontraron grupos";
-        
-        // Fase 1: Calcular los contadores de todas las cartas
+        // calcular los contadres de las cartas
         int[] contadores = new int[NombreCarta.values().length];
         for (Carta carta : cartas) {
             contadores[carta.getNombre().ordinal()]++;
         }
-        
-        // Fase 2: Validar si hubo grupos y calcular el puntaje
+
+        // validar si hubo grupos
         boolean hayGrupos = false;
-        int puntajeTotal = 0;
-        
-        for (int i = 0; i < contadores.length; i++) {
-            int contador = contadores[i];
-            
-            // Si el contador es 1, es una carta única que no forma grupo
-            if (contador == 1) {
-                puntajeTotal += PUNTOS_POR_CARTA[i];
-            }
-            
-            // Si el contador es 2 o más, hay un grupo
+        for (int contador : contadores) {
             if (contador >= 2) {
                 hayGrupos = true;
+                break;
             }
         }
-        
+
         // obtener los grupos
         if (hayGrupos) {
             resultado = "Se hallaron los siguientes grupos:\n";
+
             for (int i = 0; i < contadores.length; i++) {
                 int contador = contadores[i];
                 if (contador >= 2) {
                     resultado += Grupo.values()[contador] + " de " + NombreCarta.values()[i] + "\n";
                 }
+
             }
         }
-        
-        // obtener puntaje
-        resultado += "\nPuntaje total por cartas únicas: " + puntajeTotal;
-        
         return resultado;
     }
     // FUNCIONALIDAD: Escaleras de la misma pinta
@@ -151,9 +130,29 @@ public String getEscaleras() {
 
     // aquí ya no usamos equals
     if (escaleras != "") {
-        resultado = "\nSe hallaron las siguientes escaleras:\n" + escaleras;
+        resultado = "Se hallaron las siguientes escaleras:\n" + escaleras;
     }
 
     return resultado;
- }
+}
+    public int getPuntajeCartasSolas() {
+    int puntaje = 0;
+
+    // 1. Contar cuántas veces aparece cada nombre de carta
+    int[] contadores = new int[NombreCarta.values().length];
+    for (Carta carta : cartas) {
+        contadores[carta.getNombre().ordinal()]++;
+    }
+
+    // 2. Recorrer las cartas de la mano
+    for (Carta carta : cartas) {
+        // Solo sumamos si esa carta está exactamente UNA vez en la mano
+        if (contadores[carta.getNombre().ordinal()] == 1) {
+            puntaje += carta.getValor();
+        }
+    }
+
+    return puntaje;
+}
+
 }

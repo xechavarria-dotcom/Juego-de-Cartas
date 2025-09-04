@@ -1,7 +1,6 @@
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Random;
-
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -53,5 +52,17 @@ public class Carta {
          */
         return NombreCarta.values()[posicion];
     }
+
+    public int getValor() {
+    int numero = ((indice - 1) % 13) + 1;
+
+    if (numero == 1) { // Ace
+        return 10;
+    } else if (numero >= 11) { // Jack, Queen, King
+        return 10;
+    } else {
+        return numero; // 2–10
+    }
+}
 
 }
