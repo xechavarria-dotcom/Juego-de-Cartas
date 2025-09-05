@@ -33,7 +33,7 @@ public class Jugador {
 
     public String getGrupos() {
         String resultado = "No se encontraron grupos";
-        // calcular los contadres de las cartas
+        // calcular los contadores de las cartas
         int[] contadores = new int[NombreCarta.values().length];
         for (Carta carta : cartas) {
             contadores[carta.getNombre().ordinal()]++;
@@ -57,18 +57,18 @@ public class Jugador {
                 if (contador >= 2) {
                     resultado += Grupo.values()[contador] + " de " + NombreCarta.values()[i] + "\n";
                 }
-
             }
         }
         return resultado;
     }
-    // FUNCIONALIDAD: Escaleras de la misma pinta
-public String getEscaleras() {
+//NUEVA FUNCIONLIDAD: Escaleras de la misma pinta 
+
+    public String getEscaleras() {
     String resultado = "No se encontraron escaleras";
     String escaleras = "";
 
-    // arreglo para mostrar cartas con símbolos y numeros correspondientes
     String[] nombresCartas = {"A","2","3","4","5","6","7","8","9","10","J","Q","K"};
+    Grupo[] grupos = Grupo.values(); // usamos el enum Grupo
 
     for (Pinta pinta : Pinta.values()) {
         boolean[] numeros = new boolean[13];
@@ -80,79 +80,55 @@ public String getEscaleras() {
 
         int inicio = -1;
         int longitud = 0;
+
         for (int i = 0; i < numeros.length; i++) {
             if (numeros[i]) {
-                if (inicio == -1) {
-                    inicio = i;
-                }
+                if (inicio == -1) inicio = i;
                 longitud++;
-            } else {
+            }
+
+            // Procesar escalera si encontramos un false o estamos al final
+            if (!numeros[i] || i == numeros.length - 1) {
                 if (longitud >= 3) {
-                    // armar texto con las cartas encontradas
                     String cartasEscalera = "";
                     for (int j = inicio; j < inicio + longitud; j++) {
-                        cartasEscalera += nombresCartas[j] + " ";
+                        cartasEscalera += nombresCartas[j] + ((j < inicio + longitud - 1) ? ", " : "");
                     }
 
-                    if (longitud == 3) {
-                        escaleras += "Se halló una tercia de " + pinta + ": " + cartasEscalera + "\n";
-                    } else if (longitud == 4) {
-                        escaleras += "Se halló una cuarta de " + pinta + ": " + cartasEscalera + "\n";
-                    } else if (longitud == 5) {
-                        escaleras += "Se halló una quinta de " + pinta + ": " + cartasEscalera + "\n";
-                    } else {
-                        escaleras += "Se halló una escalera de " + pinta + " de " + longitud + " cartas: " + cartasEscalera + "\n";
-                    }
+                    Grupo grupoEncontrado = (longitud < grupos.length) ? grupos[longitud] : Grupo.DECIMA;
+                    escaleras += "Se halló un " + grupoEncontrado + " de " + pinta + ": " + cartasEscalera + "\n";
                 }
                 inicio = -1;
                 longitud = 0;
             }
         }
-
-        // verificar al final
-        if (longitud >= 3) {
-            String cartasEscalera = "";
-            for (int j = inicio; j < inicio + longitud; j++) {
-                cartasEscalera += nombresCartas[j] + " ";
-            }
-
-            if (longitud == 3) {
-                escaleras += "Se halló una tercia de " + pinta + ": " + cartasEscalera + "\n";
-            } else if (longitud == 4) {
-                escaleras += "Se halló una cuarta de " + pinta + ": " + cartasEscalera + "\n";
-            } else if (longitud == 5) {
-                escaleras += "Se halló una quinta de " + pinta + ": " + cartasEscalera + "\n";
-            } else {
-                escaleras += "Se halló una escalera de " + pinta + " de " + longitud + " cartas: " + cartasEscalera + "\n";
-            }
-        }
     }
 
-    // aquí ya no usamos equals
     if (escaleras != "") {
         resultado = "Se hallaron las siguientes escaleras:\n" + escaleras;
     }
 
     return resultado;
 }
+
+    // NUEVA FUNCIONALIDAD: Obtener puntaje de los jugadores.
     public int getPuntajeCartasSolas() {
-    int puntaje = 0;
+        int puntaje = 0;
 
-    // 1. Contar cuántas veces aparece cada nombre de carta
-    int[] contadores = new int[NombreCarta.values().length];
-    for (Carta carta : cartas) {
-        contadores[carta.getNombre().ordinal()]++;
-    }
-
-    // 2. Recorrer las cartas de la mano
-    for (Carta carta : cartas) {
-        // Solo sumamos si esa carta está exactamente UNA vez en la mano
-        if (contadores[carta.getNombre().ordinal()] == 1) {
-            puntaje += carta.getValor();
+        // 1. Contar cuántas veces aparece cada nombre de carta
+        int[] contadores = new int[NombreCarta.values().length];
+        for (Carta carta : cartas) {
+            contadores[carta.getNombre().ordinal()]++;
         }
+
+        // 2. Recorrer las cartas de la mano
+        for (Carta carta : cartas) {
+            // Solo sumamos si esa carta está exactamente UNA vez en la mano
+            if (contadores[carta.getNombre().ordinal()] == 1) {
+                puntaje += carta.getValor();
+            }
+        }
+
+        return puntaje;
     }
-
-    return puntaje;
-}
-
 }
