@@ -33,13 +33,11 @@ public class Jugador {
 
     public String getGrupos() {
         String resultado = "No se encontraron grupos";
-        // calcular los contadores de las cartas
         int[] contadores = new int[NombreCarta.values().length];
         for (Carta carta : cartas) {
             contadores[carta.getNombre().ordinal()]++;
         }
 
-        // validar si hubo grupos
         boolean hayGrupos = false;
         for (int contador : contadores) {
             if (contador >= 2) {
@@ -48,10 +46,8 @@ public class Jugador {
             }
         }
 
-        // obtener los grupos
         if (hayGrupos) {
             resultado = "Se hallaron los siguientes grupos:\n";
-
             for (int i = 0; i < contadores.length; i++) {
                 int contador = contadores[i];
                 if (contador >= 2) {
@@ -59,71 +55,91 @@ public class Jugador {
                 }
             }
         }
+
         return resultado;
     }
-//NUEVA FUNCIONLIDAD: Escaleras de la misma pinta 
-
+//NUEVA FUNCIONALIDAD: Escaleras desde 2 cartas del mismo palo consecutivas
     public String getEscaleras() {
     String resultado = "No se encontraron escaleras";
     String escaleras = "";
-
-    String[] nombresCartas = {"A","2","3","4","5","6","7","8","9","10","J","Q","K"};
-    Grupo[] grupos = Grupo.values(); // usamos el enum Grupo
-
+    // Nombres de las cartas en orden
+    String[] nombresCartas = {"A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"};
+    // Arreglo con los grupos posibles PAR, TERNA, etc.
+    Grupo[] grupos = Grupo.values();
+    // Recorremos cada pinta: CORAZÓN, PICA, etc.
     for (Pinta pinta : Pinta.values()) {
-        boolean[] numeros = new boolean[13];
+
+        // Arreglo para marcar qué valores de carta existen en esta pinta
+        boolean[] numeros = new boolean[13]; 
         for (int i = 0; i < TOTAL_CARTAS; i++) {
             if (cartas[i].getPinta() == pinta) {
-                numeros[cartas[i].getNombre().ordinal()] = true;
-            }
+                int posicion = cartas[i].getNombre().ordinal();
+                numeros[posicion] = true;
+         }
         }
-
+        // Detectar secuencias de cartas consecutivas en esta pinta
         int inicio = -1;
         int longitud = 0;
+        boolean escaleraPendiente = false;
 
         for (int i = 0; i < numeros.length; i++) {
             if (numeros[i]) {
-                if (inicio == -1) inicio = i;
-                longitud++;
-            }
-
-            // Procesar escalera si encontramos un false o estamos al final
-            if (!numeros[i] || i == numeros.length - 1) {
-                if (longitud >= 3) {
-                    String cartasEscalera = "";
-                    for (int j = inicio; j < inicio + longitud; j++) {
-                        cartasEscalera += nombresCartas[j] + ((j < inicio + longitud - 1) ? ", " : "");
-                    }
-
-                    Grupo grupoEncontrado = (longitud < grupos.length) ? grupos[longitud] : Grupo.DECIMA;
-                    escaleras += "Se halló un " + grupoEncontrado + " de " + pinta + ": " + cartasEscalera + "\n";
+                if (inicio == -1) {
+                    inicio = i;
                 }
-                inicio = -1;
-                longitud = 0;
-            }
+                longitud++;
+                escaleraPendiente = true;
+            } else {
+                if (escaleraPendiente) {
+                    // Terminó una escalera,entonces procesarla
+                    escaleras = escaleras + procesarEscalera(nombresCartas, grupos, inicio, longitud, pinta);
+                    // Reinicio para buscar nueva
+                    escaleraPendiente = false;
+                    inicio = -1;
+                    longitud = 0;
+             }
+          }
+        }
+        // Por si terminó en una escalera (última carta)
+        if (escaleraPendiente) {
+            escaleras = escaleras + procesarEscalera(nombresCartas, grupos, inicio, longitud, pinta);
         }
     }
 
+    // Si se encontró al menos una escalera, se actualiza el mensaje
     if (escaleras != "") {
         resultado = "Se hallaron las siguientes escaleras:\n" + escaleras;
     }
-
     return resultado;
+}
+//Encapsulo el metodo procesarEscalera que es una funcion de apoyo
+private String procesarEscalera(String[] nombresCartas, Grupo[] grupos, int inicio, int longitud, Pinta pinta) {
+    if (longitud < 2) {
+        return ""; // No es válida si tiene menos de dos cartas
+    }
+    String desde = nombresCartas[inicio];
+    String hasta = nombresCartas[inicio + longitud - 1];
+    Grupo grupoEncontrado;
+
+    // Si la longitud excede los grupos disponibles, usar el último (DECIMA)
+    if (longitud < grupos.length) {
+        grupoEncontrado = grupos[longitud];
+    } else {
+        grupoEncontrado = Grupo.DECIMA;
+    }
+    return grupoEncontrado + " de " + pinta + ": de " + desde + " a " + hasta + "\n";
 }
 
     // NUEVA FUNCIONALIDAD: Obtener puntaje de los jugadores.
     public int getPuntajeCartasSolas() {
         int puntaje = 0;
 
-        // 1. Contar cuántas veces aparece cada nombre de carta
         int[] contadores = new int[NombreCarta.values().length];
         for (Carta carta : cartas) {
             contadores[carta.getNombre().ordinal()]++;
         }
 
-        // 2. Recorrer las cartas de la mano
         for (Carta carta : cartas) {
-            // Solo sumamos si esa carta está exactamente UNA vez en la mano
             if (contadores[carta.getNombre().ordinal()] == 1) {
                 puntaje += carta.getValor();
             }
